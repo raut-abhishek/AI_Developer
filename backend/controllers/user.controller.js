@@ -1,17 +1,18 @@
 import userModel from '../models/user.model.js';
 import userService from '../services/user.service.js';
 
+import bcrypt from 'bcryptjs';
+import pkg from 'jsonwebtoken';
+import userModel from '../models/userModel.js';
+import transporter from '../config/nodemailer.js';
+import {EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE} from '../config/emailTemplates.js'
 
 export const createUserController = async (req, res)=>{
     
 }
 
 
-import bcrypt from 'bcryptjs';
-import pkg from 'jsonwebtoken';
-import userModel from '../models/userModel.js';
-import transporter from '../config/nodemailer.js';
-import {EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE} from '../config/emailTemplates.js'
+
 
 
 const { sign, verify } = pkg;

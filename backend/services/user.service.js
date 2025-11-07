@@ -1,7 +1,7 @@
 import userModel from '../models/user.model.js';
 
 
-export const createuser = async ({ email, password }) => {
+export const createUser = async ({ email, password }) => {
 
     if(!email || !password){
         throw new console.error('Email and password are required');

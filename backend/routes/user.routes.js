@@ -19,6 +19,8 @@ router.post('/login',
     userController.loginController
 )
 
+router.get('/logout', authMiddleware.authUser, userController.logoutController)
+
 
 router.get('/profile', authMiddleware.authUser, userController.profileController)
 

@@ -1,10 +1,13 @@
 import React from 'react'
-import { useState } from "react";
+import { useState , useContext} from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from '../config/axios.js';
+import {UserContext} from '../context/user.context.jsx'
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+  const {setUser} = useContext(UserContext);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -12,9 +15,22 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: handle login logic here (API call, validation, etc.)
-    console.log("Login Data:", formData);
-    navigate("/dashboard"); // redirect after login
+
+    axios.post('/user/login', {
+      email: formData.email ,
+      password: formData.password,
+    }).then((res)=> {
+      console.log(res.data);
+
+      localStorage.setItem('token', res.data.token)
+
+      setUser(res.data.user)
+
+      navigate("/");
+    }).catch((err)=> {
+      console.log(err.response?.data);
+    })
+    
   };
 
   return (

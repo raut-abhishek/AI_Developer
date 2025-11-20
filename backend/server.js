@@ -10,7 +10,7 @@ const server = http.createServer(app);
 
 const io = new Server(server);
 
-io.on('connection', client => {
+io.on('connection', socket => {
   socket.on('event', data => { /* … */ });
   socket.on('disconnect', () => { /* … */ });
 });

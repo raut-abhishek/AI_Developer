@@ -12,6 +12,7 @@ const Project = () => {
     const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState([]);
+    const [project, setProject] = useState(location.state.project)
 
     const [users, setUsers] = useState([])
 
@@ -27,7 +28,28 @@ const Project = () => {
       })
     }
 
+
+    function addCollaborators(){
+
+      axios.put('/projects/add-user',{
+        projectId: location.state.project._id,
+        users: Array.from(selectedUserId)
+      }).then(res=>{
+        setIsModelOpen(false)
+      }).catch(err=>{
+        console.log(err);
+      })
+
+    }
+
+
+
+
     useEffect(()=>{
+
+      
+
+
       axios.get('/user/all').then(res=>{
         setUsers(res.data.users)
       }).catch(err=>{
@@ -123,7 +145,7 @@ const Project = () => {
             </div>
 
             <button
-            // onClick={addCollaborators}
+            onClick={addCollaborators}
             className='absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-blue-600 text-white rounded-md'>
               Add Collaborators
             </button>

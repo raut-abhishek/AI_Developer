@@ -47,7 +47,9 @@ const Project = () => {
 
     useEffect(()=>{
 
-      
+      axios.get(`/projects/get-project/${location.state.project._id}`).then(res=>{
+        setProject(res.data.project)
+      })
 
 
       axios.get('/user/all').then(res=>{
@@ -101,7 +103,8 @@ const Project = () => {
         </div>
 
         <div className={`sidePanel w-full h-full flex flex-col gap-2 bg-slate-50 absolute top-0 left-0 transition-all ${ isSidePanelOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <header className='flex justify-end p-2 px-4 bg-slate-200'>
+          <header className='flex justify-between items-center p-2 px-4 bg-slate-200'>
+            <h1 className='font-semibold text-lg'>Collaborators</h1>
             <button className='p-2' onClick=  {()=>setIsSidePanelOpen(!isSidePanelOpen)}>
               <i className="ri-close-fill"></i>
             </button>
@@ -110,12 +113,16 @@ const Project = () => {
 
 
           <div className="users flex flex-col gap-2">
-            <div className="user cursor-pointer flex gap-2 items-center hover:bg-slate-200 rounded-full p-2">
-              <div className='aspect-square w-fit h-fit flex items-center justify-center rounded-full p-5 text-white bg-slate-600'>
-                <i className="ri-account-circle-fill absolute"></i>
-              </div>
-              <h1 className='font-semibold text-lg '>username</h1>
-            </div>
+            {project.users && project.users.map(user=>{
+              return (
+                <div className="user cursor-pointer flex gap-2 items-center hover:bg-slate-200 rounded-full p-2">
+                  <div className='aspect-square w-fit h-fit flex items-center justify-center rounded-full p-5 text-white bg-slate-600'>
+                    <i className="ri-account-circle-fill absolute"></i>
+                  </div>
+                  <h1 className='font-semibold text-lg '>{user.email}</h1>
+                </div>
+              )
+            })}
 
           </div>
 

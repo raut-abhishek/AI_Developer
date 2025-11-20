@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from '../config/axios.js'
 
 const Project = () => {
 
@@ -15,10 +16,27 @@ const Project = () => {
     const [users, setUsers] = useState([])
 
     const handelUserClick = (id)=>{
-      setSelectedUserId([...selectedUserId, id]);
+      setSelectedUserId(prevSelectedUserId=>{
+        const newSelectedUserId = new Set(prevSelectedUserId);
+        if(newSelectedUserId.has(id)){
+          newSelectedUserId.delete(id);
+        }else{
+          newSelectedUserId.add(id);
+        }
+        return newSelectedUserId;
+      })
     }
 
-    
+    useEffect(()=>{
+      axios.get('/user/all').then(res=>{
+        setUsers(res.data.users)
+      }).catch(err=>{
+        console.log(err);
+      })
+
+    },[])
+
+
 
 
 
@@ -95,11 +113,11 @@ const Project = () => {
             </header>
             <div className="users-list flex flex-col gap-2 mb-16 max-h-96 overflow-auto">
               {users.map(user => (
-                <div key={user.id} className={`user cursor-pointer hover:bg-slate-200 ${Array.from(selectedUserId).indexOf(user.id) != -1 ? 'bg-slate-200' : ""} p-2 flex gap-2 items-center`} onClick={() => handelUserClick(user.id)}>
+                <div key={user._id} className={`user cursor-pointer hover:bg-slate-200 ${Array.from(selectedUserId).indexOf(user._id) != -1 ? 'bg-slate-200' : ""} p-2 flex gap-2 items-center`} onClick={() => handelUserClick(user._id)}>
                   <div className='aspect-square relative rounded-full w-fit h-fit flex items-center justify-center p-5 text-white bg-slate-600'>
                     <i className="ri-user-fill absolute"></i>
                   </div>
-                  <h1 className='font-semibold text-lg'>{user.name}</h1>
+                  <h1 className='font-semibold text-lg'>{user.email}</h1>
                 </div>
               ))}
             </div>

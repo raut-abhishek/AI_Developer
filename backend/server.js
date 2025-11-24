@@ -29,7 +29,7 @@ io.use(async (socket, next) => {
             return next(new Error('Invalid projectId'));
         }
 
-
+        
         socket.project = await projectModel.findById(projectId);
 
 
@@ -57,12 +57,16 @@ io.use(async (socket, next) => {
 
 
 io.on('connection', socket => {
+    console.log('User connected');
+    
+    socket.roomId = socket.project._id.toString();
 
-    socket.join(socket.project._id);
+    socket.join(socket.roomId);
 
     socket.on('project-message', async data =>{
+        console.log(data);
         socket.broadcast.to(socket.roomId).emit('project-message', data)
-    })
+    });
 
 
   socket.on('event', data => { /* … */ });

@@ -18,6 +18,7 @@ const Project = () => {
     const [message, setMessage] = useState('');
     const {user} = useContext(UserContext);
     const [users, setUsers] = useState([]);
+    const messageBox = React.createRef();
 
     const handelUserClick = (id)=>{
       setSelectedUserId(prevSelectedUserId=>{
@@ -46,23 +47,31 @@ const Project = () => {
     }
 
 
-    function send(){
-      sendMessage('project-message',{
+    function send() {
+      const msgObject = {
         message,
-        sender: user._id
-      })
-      setMessage("")
-    }
+        sender: user   
+      };
 
+      sendMessage('project-message', msgObject);
+      appendOutgoingMessage(msgObject);
+      setMessage("");
+    }
 
 
 
     useEffect(()=>{
 
-      initializeSocket(project._id);
-      receiveMessage('project-message', data=>{
-        console.log(data);
-      })
+      const socket = initializeSocket(project._id);
+
+
+      const handler = (data) => {
+        if (data.sender._id !== user._id) {
+          appendIncommingMessage(data);
+        }
+      };
+
+      receiveMessage('project-message', handler);
 
 
 
@@ -77,7 +86,38 @@ const Project = () => {
         console.log(err);
       })
 
-    },[])
+
+      return () => {
+        socket.off('project-message', handler);
+      };
+
+    },[]);
+
+
+    function appendIncommingMessage(messageObject){
+      const messageBox = document.querySelector('.message-box');
+      const message = document.createElement('div');
+      message.classList.add('message','max-w-56', 'flex', 'flex-col', 'p-2', 'bg-slate-50', 'rounded-md', 'break-words');
+      message.innerHTML = `
+      <small class='text-gray-500 text-xs'>${messageObject.sender.email}</small>
+      <p class='text-sm'>${messageObject.message}</p>
+      `
+
+      messageBox.appendChild(message);
+    }
+
+    function appendOutgoingMessage(messageObject){
+      const messageBox = document.querySelector('.message-box');
+      const message = document.createElement('div');
+      message.classList.add('ml-auto','max-w-60', 'flex', 'flex-col', 'p-2','bg-slate-50', 'rounded-md', 'break-words', 'w-fit');
+      message.innerHTML = `
+      <small class='text-gray-500 text-xs'>${messageObject.sender.email}</small>
+      <p class='text-sm'>${messageObject.message}</p>
+      `
+
+      messageBox.appendChild(message);
+    }
+
 
 
 
@@ -103,7 +143,9 @@ const Project = () => {
 
         <div className="conversation-area grow flex flex-col">
           <div className="message-box grow flex flex-col gap-2 p-1">
-            <div className="message max-w-60 flex flex-col p-2 bg-slate-50 wrap-break-word rounded-md">
+            <div 
+            ref={messageBox}
+            className="message max-w-60 flex flex-col p-2 bg-slate-50 wrap-break-word rounded-md">
               <small className='opacity-65 text-xs'>example@gmail.com</small>
               <p className='text-sm'>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
             </div>

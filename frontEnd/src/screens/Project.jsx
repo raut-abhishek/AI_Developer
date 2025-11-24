@@ -97,7 +97,7 @@ const Project = () => {
     function appendIncommingMessage(messageObject){
       const messageBox = document.querySelector('.message-box');
       const message = document.createElement('div');
-      message.classList.add('message','max-w-56', 'flex', 'flex-col', 'p-2', 'bg-slate-50', 'rounded-md', 'break-words');
+      message.classList.add('message', 'w-fit','max-w-60', 'flex', 'flex-col', 'p-2', 'bg-slate-50', 'rounded-md', 'break-words');
       message.innerHTML = `
       <small class='text-gray-500 text-xs'>${messageObject.sender.email}</small>
       <p class='text-sm'>${messageObject.message}</p>

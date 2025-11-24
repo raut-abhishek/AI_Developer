@@ -29,7 +29,7 @@ const Home = () => {
   useEffect(()=>{
     axios.get('/projects/all').then((res)=>{
       setProject(res.data.projects)
-      console.log(res);
+      // console.log(res);
     })
   },[])
 

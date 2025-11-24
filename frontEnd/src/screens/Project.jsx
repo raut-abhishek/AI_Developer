@@ -104,6 +104,7 @@ const Project = () => {
       `
 
       messageBox.appendChild(message);
+      scrollToBottom();
     }
 
     function appendOutgoingMessage(messageObject){
@@ -116,6 +117,11 @@ const Project = () => {
       `
 
       messageBox.appendChild(message);
+      scrollToBottom();
+    }
+
+    function scrollToBottom(){
+      messageBox.current.scrollTop = messageBox.current.scrollHeight;
     }
 
 
@@ -125,9 +131,9 @@ const Project = () => {
 
   return (
     <main className='h-screen w-screen flex'>
-      <section className='left h-full min-w-96 flex flex-col bg-slate-300 relative'>
+      <section className='left relative flex flex-col h-screen min-w-96 bg-slate-300 border-r border-gray-400'>
 
-        <header className='flex justify-between items-center p-2 px-4 w-full bg-slate-100'>
+        <header className='flex justify-between items-center p-2 px-4 w-full bg-slate-100 absolute z-10 top-0 rounded-b-md'>
 
           <button className='flex gap-2' onClick=  {()=>setIsModelOpen(true)}> 
             <i className="ri-add-fill mr-1"></i>
@@ -141,29 +147,25 @@ const Project = () => {
           </button>
         </header>
 
-        <div className="conversation-area grow flex flex-col">
-          <div className="message-box grow flex flex-col gap-2 p-1">
-            <div 
-            ref={messageBox}
-            className="message max-w-60 flex flex-col p-2 bg-slate-50 wrap-break-word rounded-md">
-              <small className='opacity-65 text-xs'>example@gmail.com</small>
-              <p className='text-sm'>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
+        <div className="conversation-area pt-14 grow flex flex-col h-full relative " >
+          
+            <div ref={messageBox} className="message-box grow p-1 flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
             </div>
-            <div className="message max-w-60 ml-auto flex flex-col p-2 bg-slate-50 w-fit rounded-md">
-              <small className='opacity-65 text-xs'>example@gmail.com</small>
-              <p className='text-sm'>Lorem ipsum dolor sit amet.aaaaaaaaaaaaaaaaa</p>
-            </div>
-          </div>
+            
+          
+          
 
-          <div className="inputField flex items-center justify-between">
+          <div className="inputField w-full px-3 py-3 bg-white rounded-t-md flex items-center gap-2">
             <input 
             value={message}
             onChange={(e)=> setMessage(e.target.value)}
-            className='p-2 px-4 border-none outline-no grow ' 
+            className='grow rounded-full bg-gray-100 px-4 py-2 text-sm outline-none border border-transparent focus:border-gray-300 transition' 
             type="text" 
-            placeholder='Type message' />
-            <button onClick={send} className='px-5 text-white bg-black h-full flex items-center justify-center rounded-full'>
-              <i className="ri-send-plane-fill"></i>
+            placeholder='Type message...' 
+            />
+
+            <button onClick={send} className='w-10 h-10 bg-black text-white rounded-full flex items-center justify-center active:scale-95 transition'>
+              <i className="ri-send-plane-fill text-lg"></i>
             </button>
           </div>
         </div>

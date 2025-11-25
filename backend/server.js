@@ -70,7 +70,10 @@ io.on('connection', socket => {
 
 
   socket.on('event', data => { /* … */ });
-  socket.on('disconnect', () => { /* … */ });
+  socket.on('disconnect', () => {
+    console.log('User Disconnected');
+    socket.leave(socket.roomId);
+  });
 });
 
 

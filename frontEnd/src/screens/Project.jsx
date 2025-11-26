@@ -3,7 +3,10 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../config/axios.js'
 import { initializeSocket, receiveMessage, sendMessage } from '../config/socket.js';
-import {UserContext} from '../context/user.context.jsx'
+import {UserContext} from '../context/user.context.jsx';
+import Markdown from 'markdown-to-jsx';
+
+
 
 const Project = () => {
 
@@ -19,6 +22,7 @@ const Project = () => {
     const {user} = useContext(UserContext);
     const [users, setUsers] = useState([]);
     const messageBox = React.createRef();
+    const [ messages, setMessages ] = useState([])
 
     const handelUserClick = (id)=>{
       setSelectedUserId(prevSelectedUserId=>{
@@ -48,13 +52,13 @@ const Project = () => {
 
 
     function send() {
-      const msgObject = {
+      const msgObj = {
         message,
-        sender: user   
-      };
+        sender: user
+      }
 
-      sendMessage('project-message', msgObject);
-      appendOutgoingMessage(msgObject);
+      sendMessage('project-message', msgObj);
+      setMessages(prevMessages => [ ...prevMessages, { sender: user, message } ])
       setMessage("");
     }
 
@@ -64,15 +68,14 @@ const Project = () => {
 
       const socket = initializeSocket(project._id);
 
+      
 
-      const handler = (data) => {
-        if (data.sender._id !== user._id) {
-          appendIncommingMessage(data);
-        }
-      };
+      const handleIncomming = (data)=>{
+        if (data.sender._id === user._id) return;
+        setMessages(prevMessages=>[...prevMessages, data])
+      }
 
-      receiveMessage('project-message', handler);
-
+      receiveMessage('project-message',handleIncomming)
 
 
       axios.get(`/projects/get-project/${location.state.project._id}`).then(res=>{
@@ -86,43 +89,13 @@ const Project = () => {
         console.log(err);
       })
 
+      return()=>{
+        socket.off("project-message", handleIncomming);
+      }
 
-      return () => {
-        socket.off('project-message', handler);
-      };
 
     },[]);
 
-
-    function appendIncommingMessage(messageObject){
-      const messageBox = document.querySelector('.message-box');
-      const message = document.createElement('div');
-      message.classList.add('message', 'w-fit','max-w-60', 'flex', 'flex-col', 'p-2', 'bg-slate-50', 'rounded-md', 'break-words');
-      message.innerHTML = `
-      <small class='text-gray-500 text-xs'>${messageObject.sender.email}</small>
-      <p class='text-sm'>${messageObject.message}</p>
-      `
-
-      messageBox.appendChild(message);
-      scrollToBottom();
-    }
-
-    function appendOutgoingMessage(messageObject){
-      const messageBox = document.querySelector('.message-box');
-      const message = document.createElement('div');
-      message.classList.add('ml-auto','max-w-60', 'flex', 'flex-col', 'p-2','bg-slate-50', 'rounded-md', 'break-words', 'w-fit');
-      message.innerHTML = `
-      <small class='text-gray-500 text-xs'>${messageObject.sender.email}</small>
-      <p class='text-sm'>${messageObject.message}</p>
-      `
-
-      messageBox.appendChild(message);
-      scrollToBottom();
-    }
-
-    function scrollToBottom(){
-      messageBox.current.scrollTop = messageBox.current.scrollHeight;
-    }
 
 
 
@@ -149,7 +122,23 @@ const Project = () => {
 
         <div className="conversation-area pt-14 grow flex flex-col h-full relative " >
           
-            <div ref={messageBox} className="message-box grow p-1 flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
+            <div 
+            ref={messageBox} 
+            className="message-box grow p-1 flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
+              {messages.map((msg, index) => (
+                <div key={index} className={`${msg.sender._id === 'ai' ? 'max-w-80' : 'max-w-54'} ${msg.sender._id == user._id.toString() && 'ml-auto'} maz-w-54 message flex flex-col p-2 bg-slate-50 w-fit rounded-md`}>
+                  <small className='opacity-65 text-xs'>{msg.sender.email}</small>
+                  <div className='text-sm'>
+                    {msg.sender._id === 'ai' ?
+                    <div className='overflow-auto bg-slate-950 text-white p-2 rounded-sm'>
+
+                      <Markdown>{msg.message}</Markdown> 
+                    </div>
+                    :
+                    msg.message}
+                  </div>
+                </div>
+              ))}
             </div>
             
           

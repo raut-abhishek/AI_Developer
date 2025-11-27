@@ -134,6 +134,10 @@ const Project = () => {
         }
         console.log(parsedMessage);
 
+        if(parsedMessage.fileTree){
+          setFileTree(parsedMessage.fileTree);
+        }
+
 
         const messageData = { ...data, parsedMessage };
 

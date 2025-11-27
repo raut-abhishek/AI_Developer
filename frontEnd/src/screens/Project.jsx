@@ -23,14 +23,7 @@ const Project = () => {
     const [users, setUsers] = useState([]);
     const messageBox = React.createRef();
     const [ messages, setMessages ] = useState([])
-    const [fileTree, setFileTree] = useState({
-      "app.js":{
-        content: `const express = require('express');`
-      },
-      "package.json":{
-        content: `{ "name": "temp-server" }`
-      }
-    })
+    const [fileTree, setFileTree] = useState({})
     const [currentFile, setCurrentFile] = useState(null);
     const [openFiles, setOpenFiles] = useState([])
 
@@ -104,7 +97,7 @@ const Project = () => {
 
       const handleIncomming = (data)=>{
         if (data.sender._id === user._id) return;
-        console.log(data);
+        console.log(JSON.parse(data.message))
         setMessages(prevMessages=>[...prevMessages, data])
       }
 

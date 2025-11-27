@@ -94,12 +94,54 @@ const Project = () => {
       const socket = initializeSocket(project._id);
 
       
+      // old handleIncomming function
+      // const handleIncomming = (data)=>{
+      //   if (data.sender._id === user._id) return;
 
-      const handleIncomming = (data)=>{
+
+      //   console.log(data);
+        
+
+
+      //   setMessages(prevMessages=>[...prevMessages, data])
+      // }
+
+
+      const handleIncomming = (data) => {
         if (data.sender._id === user._id) return;
-        console.log(JSON.parse(data.message))
-        setMessages(prevMessages=>[...prevMessages, data])
-      }
+
+        let parsedMessage = data.message;
+
+
+        if (data.sender._id === 'ai' && typeof data.message === 'string') {
+          const jsonStartPattern = '```json\n';
+          const jsonEndPattern = '\n```';
+          let jsonString = data.message;
+
+          if (jsonString.startsWith(jsonStartPattern) && jsonString.endsWith(jsonEndPattern)) {
+            jsonString = jsonString.substring(
+              jsonStartPattern.length,
+              jsonString.length - jsonEndPattern.length
+            ).trim();
+          }
+
+          try {
+            parsedMessage = JSON.parse(jsonString);
+          } catch (err) {
+            console.error("Failed to parse AI message JSON:", err);
+            parsedMessage = { text: data.message }; // fallback to raw text
+          }
+        }
+        console.log(parsedMessage);
+
+
+        const messageData = { ...data, parsedMessage };
+
+        setMessages((prevMessages) => [...prevMessages, messageData]);
+      };
+
+
+
 
       receiveMessage('project-message',handleIncomming)
 

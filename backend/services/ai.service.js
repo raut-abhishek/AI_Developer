@@ -102,7 +102,36 @@ const model = genAI.getGenerativeModel({
 export const generateResult = async(prompt)=>{
     
     const result = await model.generateContent(prompt);
-    return result.response.text()
+    const responseText = result.response.text();
+    
+    console.log("Raw Gemini response:", responseText);
+    
+    // Ensure the response is properly formatted
+    try {
+        // First, try to extract JSON from markdown code blocks
+        let jsonString = responseText;
+        
+        // Remove markdown code block markers
+        const codeBlockMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeBlockMatch) {
+            jsonString = codeBlockMatch[1].trim();
+        }
+        
+        // Try to extract JSON object
+        const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            const cleaned = jsonMatch[0];
+            console.log("Extracted JSON:", cleaned);
+            const parsed = JSON.parse(cleaned);
+            console.log("Parsed successfully:", parsed);
+            return JSON.stringify(parsed);
+        }
+    } catch (err) {
+        console.error("Could not parse Gemini response as JSON:", err);
+    }
+    
+    console.log("Returning raw response as fallback");
+    return JSON.stringify({ text: responseText });
 
 }
 

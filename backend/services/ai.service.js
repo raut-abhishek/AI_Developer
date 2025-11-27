@@ -91,7 +91,7 @@ const model = genAI.getGenerativeModel({
        </example>
     
  IMPORTANT : don't use file name like routes/index.js
- IMPORTANT : Return ONLY valid JSON. No backticks, no explanations, no markdown.
+
 
        
        

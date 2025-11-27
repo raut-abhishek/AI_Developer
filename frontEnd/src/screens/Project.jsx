@@ -23,6 +23,21 @@ const Project = () => {
     const [users, setUsers] = useState([]);
     const messageBox = React.createRef();
     const [ messages, setMessages ] = useState([])
+    const [fileTree, setFileTree] = useState({
+      "app.js":{
+        content: `const express = require('express');`
+      },
+      "package.json":{
+        content: `{ "name": "temp-server" }`
+      }
+    })
+    const [currentFile, setCurrentFile] = useState(null);
+    const [openFiles, setOpenFiles] = useState([])
+
+
+
+
+
 
     const handelUserClick = (id)=>{
       setSelectedUserId(prevSelectedUserId=>{
@@ -62,6 +77,23 @@ const Project = () => {
       setMessage("");
     }
 
+    function WriteAiMessage(message){
+      let text = message;
+
+      try {
+        const messageObject = JSON.parse(message);
+        text = messageObject.text || message;
+      } catch (err) {
+        text = message;
+      }
+      return (
+        <div className='overflow-auto bg-slate-950 text-white p-2 rounded-sm'>
+          <Markdown>{text}</Markdown> 
+        </div>
+      )
+
+    }
+
 
 
     useEffect(()=>{
@@ -72,6 +104,7 @@ const Project = () => {
 
       const handleIncomming = (data)=>{
         if (data.sender._id === user._id) return;
+        console.log(data);
         setMessages(prevMessages=>[...prevMessages, data])
       }
 
@@ -130,10 +163,7 @@ const Project = () => {
                   <small className='opacity-65 text-xs'>{msg.sender.email}</small>
                   <div className='text-sm'>
                     {msg.sender._id === 'ai' ?
-                    <div className='overflow-auto bg-slate-950 text-white p-2 rounded-sm'>
-
-                      <Markdown>{msg.message}</Markdown> 
-                    </div>
+                    WriteAiMessage(msg.message)
                     :
                     msg.message}
                   </div>
@@ -188,6 +218,78 @@ const Project = () => {
 
       </section>
 
+
+      <section className='right bg-red-50 grow h-full flex'> 
+        <div className="explorer h-full max-w-64 min-w-52 bg-slate-200">
+          <div className="file-tree w-full">
+            {
+              Object.keys(fileTree).map((file, index) => (
+                <button
+                key={index}
+                onClick={() => {
+                setCurrentFile(file)
+                setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
+                }}
+                className="tree-element cursor-pointer p-2 px-4 flex items-center gap-2 bg-slate-300 w-full">
+                  <p
+                  className='font-semibold text-lg'
+                  >{file}</p>
+                </button>
+              ))
+
+            }
+          </div>
+
+        </div>
+
+        {currentFile && (
+          <div className="code-editor flex flex-col grow h-full">
+
+            <div className="top flex justify-between w-full">
+
+              <div className="files flex">
+                {
+                  openFiles.map((file, index) => (
+                    <button
+                    key={index}
+                    onClick={() => setCurrentFile(file)}
+                    className={`open-file cursor-pointer p-2 px-4 flex items-center w-fit gap-2 bg-slate-300 ${currentFile === file ? 'bg-slate-400' : ''}`}
+                    >
+                      <p
+                          className='font-semibold text-lg'
+                      >{file}</p>
+                    </button>
+                  ))
+                }
+              </div>
+              
+            </div>
+
+            <div className="bottom flex grow">
+              {
+                fileTree[currentFile] && (
+                  <textarea 
+                  value={fileTree[currentFile].content}
+                  onChange={(e)=>{
+                    setFileTree({...fileTree, [currentFile]:{content:e.target.value}
+                    })
+                  }}
+                  className='w-full h-full p-4 bg-slate-50 outline-none border'
+                  >
+
+                  </textarea>
+                )
+              }
+            </div>
+            
+          </div>
+        )}
+
+      </section>
+
+
+
+
       {isModelOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-4 rounded-md w-96 max-w-full relative">
@@ -219,9 +321,6 @@ const Project = () => {
           </div>
         </div>
       )}
-
-
-
       
 
     </main>
@@ -229,3 +328,16 @@ const Project = () => {
 }
 
 export default Project;
+
+
+
+// {
+//             currentFile && (
+//               <div className="code-editor-header flex justify-between items-center p-2 bg-slate-200">
+//                 <h1 className='font-semibold text-lg'>{currentFile}</h1>
+//                 <button className='p-2' onClick={()=>setCurrentFile(null)}>
+//                   <i className='ri-close-fill'></i>
+//                 </button>
+//               </div>
+//             )
+//           }

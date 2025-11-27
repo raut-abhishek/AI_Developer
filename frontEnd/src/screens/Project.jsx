@@ -5,6 +5,7 @@ import axios from '../config/axios.js'
 import { initializeSocket, receiveMessage, sendMessage } from '../config/socket.js';
 import {UserContext} from '../context/user.context.jsx';
 import Markdown from 'markdown-to-jsx';
+import hljs from 'highlight.js';
 
 
 
@@ -112,27 +113,25 @@ const Project = () => {
 
         let parsedMessage = data.message;
 
-
-        if (data.sender._id === 'ai' && typeof data.message === 'string') {
-          const jsonStartPattern = '```json\n';
-          const jsonEndPattern = '\n```';
-          let jsonString = data.message;
-
-          if (jsonString.startsWith(jsonStartPattern) && jsonString.endsWith(jsonEndPattern)) {
-            jsonString = jsonString.substring(
-              jsonStartPattern.length,
-              jsonString.length - jsonEndPattern.length
-            ).trim();
-          }
-
+        if (data.sender._id === 'ai') {
           try {
-            parsedMessage = JSON.parse(jsonString);
+            // If message is a string, try to parse it
+            if (typeof data.message === 'string') {
+              parsedMessage = JSON.parse(data.message);
+            } else {
+              parsedMessage = data.message;
+            }
           } catch (err) {
-            console.error("Failed to parse AI message JSON:", err);
-            parsedMessage = { text: data.message }; // fallback to raw text
+            console.error("Failed to parse AI message:", err);
+            console.error("Message was:", data.message);
+            // Fallback: if it's already an object, use it; otherwise wrap in text
+            parsedMessage = typeof data.message === 'string' 
+              ? { text: data.message } 
+              : data.message;
           }
         }
-        console.log(parsedMessage);
+        
+        console.log("Parsed message:", parsedMessage);
 
         if(parsedMessage.fileTree){
           setFileTree(parsedMessage.fileTree);
@@ -176,7 +175,7 @@ const Project = () => {
 
   return (
     <main className='h-screen w-screen flex'>
-      <section className='left relative flex flex-col h-screen min-w-96 bg-slate-300 border-r border-gray-400'>
+      <section className='left relative flex flex-col h-screen min-w-96 bg-slate-300 border-r border-black'>
 
         <header className='flex justify-between items-center p-2 px-4 w-full bg-slate-100 absolute z-10 top-0 rounded-b-md'>
 
@@ -260,6 +259,9 @@ const Project = () => {
 
       <section className='right bg-red-50 grow h-full flex'> 
         <div className="explorer h-full max-w-64 min-w-52 bg-slate-200">
+          <header className="flex bg-slate-100 top-0 rounded-b-md mb-2 h-14 items-center justify-center">
+            <h1 className="text-lg">Files</h1>
+          </header>
           <div className="file-tree w-full">
             {
               Object.keys(fileTree).map((file, index) => (
@@ -269,7 +271,7 @@ const Project = () => {
                 setCurrentFile(file)
                 setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
                 }}
-                className="tree-element cursor-pointer p-2 px-4 flex items-center gap-2 bg-slate-300 w-full">
+                className="tree-element cursor-pointer p-2 px-4 flex items-center gap-2 bg-slate-300 w-full rounded-md mb-1 ">
                   <p
                   className='font-semibold text-lg'
                   >{file}</p>
@@ -282,7 +284,7 @@ const Project = () => {
         </div>
 
         {currentFile && (
-          <div className="code-editor flex flex-col grow h-full">
+          <div className="code-editor flex flex-col grow h-full shrink">
 
             <div className="top flex justify-between w-full">
 
@@ -292,7 +294,7 @@ const Project = () => {
                     <button
                     key={index}
                     onClick={() => setCurrentFile(file)}
-                    className={`open-file cursor-pointer p-2 px-4 flex items-center w-fit gap-2 bg-slate-300 ${currentFile === file ? 'bg-slate-400' : ''}`}
+                    className={`open-file cursor-pointer p-2 px-4 flex items-center w-fit gap-2  bg-slate-300 ${currentFile === file ? 'bg-slate-400' : ''}`}
                     >
                       <p
                           className='font-semibold text-lg'
@@ -304,19 +306,38 @@ const Project = () => {
               
             </div>
 
-            <div className="bottom flex grow">
+            <div className="bottom flex grow max-w-full shrink overflow-auto">
               {
-                fileTree[currentFile] && (
-                  <textarea 
-                  value={fileTree[currentFile].content}
-                  onChange={(e)=>{
-                    setFileTree({...fileTree, [currentFile]:{content:e.target.value}
-                    })
-                  }}
-                  className='w-full h-full p-4 bg-slate-50 outline-none border'
-                  >
-
-                  </textarea>
+                fileTree[ currentFile ] && (
+                  <div className="code-editor-area h-full overflow-auto grow bg-slate-50">
+                    <pre
+                    className="hljs h-full">
+                      <code
+                      className="hljs h-full outline-none"
+                      contentEditable
+                      suppressContentEditableWarning
+                      onBlur={(e) => {
+                        const updatedContent = e.target.innerText;
+                        const ft = {
+                          ...fileTree,
+                          [ currentFile ]: {
+                            file: {
+                              contents: updatedContent
+                            }
+                          }
+                        }
+                        setFileTree(ft)
+                        // saveFileTree(ft)
+                      }}
+                      dangerouslySetInnerHTML={{ __html: hljs.highlight('javascript', fileTree[ currentFile ].file.contents).value }}
+                      style={{
+                        whiteSpace: 'pre-wrap',
+                        paddingBottom: '25rem',
+                        counterSet: 'line-numbering',
+                      }}
+                      />
+                    </pre>
+                  </div>
                 )
               }
             </div>

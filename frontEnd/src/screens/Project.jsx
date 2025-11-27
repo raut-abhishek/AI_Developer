@@ -88,7 +88,9 @@ const Project = () => {
 
     }
 
-
+    function saveFileTree(ft) {
+      sendMessage('project-message', { fileTree: ft });
+    }
 
     useEffect(()=>{
 
@@ -306,38 +308,19 @@ const Project = () => {
               
             </div>
 
-            <div className="bottom flex grow max-w-full shrink overflow-auto">
+            <div className="bottom flex grow ">
               {
-                fileTree[ currentFile ] && (
-                  <div className="code-editor-area h-full overflow-auto grow bg-slate-50">
-                    <pre
-                    className="hljs h-full">
-                      <code
-                      className="hljs h-full outline-none"
-                      contentEditable
-                      suppressContentEditableWarning
-                      onBlur={(e) => {
-                        const updatedContent = e.target.innerText;
-                        const ft = {
-                          ...fileTree,
-                          [ currentFile ]: {
-                            file: {
-                              contents: updatedContent
-                            }
-                          }
-                        }
-                        setFileTree(ft)
-                        // saveFileTree(ft)
-                      }}
-                      dangerouslySetInnerHTML={{ __html: hljs.highlight('javascript', fileTree[ currentFile ].file.contents).value }}
-                      style={{
-                        whiteSpace: 'pre-wrap',
-                        paddingBottom: '25rem',
-                        counterSet: 'line-numbering',
-                      }}
-                      />
-                    </pre>
-                  </div>
+                fileTree[currentFile] && (
+                  <textarea 
+                  value={fileTree[currentFile].content}
+                  onChange={(e)=>{
+                    setFileTree({...fileTree, [currentFile]:{content:e.target.value}
+                    })
+                  }}
+                  className='w-full h-full p-4 bg-slate-50 outline-none border font-mono whitespace-pre-wrap'
+                  >
+
+                  </textarea>
                 )
               }
             </div>

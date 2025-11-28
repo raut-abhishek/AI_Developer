@@ -88,9 +88,31 @@ const Project = () => {
 
     }
 
-    function saveFileTree(ft) {
-      sendMessage('project-message', { fileTree: ft });
+    // function saveFileTree(ft) {
+    //   sendMessage('project-message', { fileTree: ft });
+    // }
+
+    function flattenTree(tree, prefix = "") {
+      let result = {};
+
+      for (let key in tree) {
+        const node = tree[key];
+
+          if (node.file) {
+            // It's a file
+            const path = prefix ? `${prefix}/${key}` : key;
+            result[path] = node.file;  // file contains { contents }
+          }
+
+          if (node.dir) {
+            const newPrefix = prefix ? `${prefix}/${key}` : key;
+            Object.assign(result, flattenTree(node.dir, newPrefix));
+          }
+      }
+
+      return result;
     }
+
 
     useEffect(()=>{
 
@@ -135,8 +157,12 @@ const Project = () => {
         
         console.log("Parsed message:", parsedMessage);
 
-        if(parsedMessage.fileTree){
-          setFileTree(parsedMessage.fileTree);
+        // if(parsedMessage.fileTree){
+        //   setFileTree(parsedMessage.fileTree);
+        // }
+        if (parsedMessage.fileTree) {
+          const flat = flattenTree(parsedMessage.fileTree);
+          setFileTree(flat);
         }
 
 
@@ -260,7 +286,7 @@ const Project = () => {
 
 
       <section className='right bg-red-50 grow h-full flex'> 
-        <div className="explorer h-full max-w-64 min-w-52 bg-slate-200">
+        <div className="explorer h-full max-w-64 min-w-80 bg-slate-200">
           <header className="flex bg-slate-100 top-0 rounded-b-md mb-2 h-14 items-center justify-center">
             <h1 className="text-lg">Files</h1>
           </header>
@@ -312,10 +338,18 @@ const Project = () => {
               {
                 fileTree[currentFile] && (
                   <textarea 
-                  value={fileTree[currentFile].content}
+                  value={fileTree[currentFile].file?.contents || ""}
                   onChange={(e)=>{
-                    setFileTree({...fileTree, [currentFile]:{content:e.target.value}
-                    })
+                    setFileTree({
+                      ...fileTree,
+                      [currentFile]: {
+                        ...fileTree[currentFile],
+                        file: {
+                          ...fileTree[currentFile].file,
+                          contents: e.target.value
+                        }
+                      }
+                    });
                   }}
                   className='w-full h-full p-4 bg-slate-50 outline-none border font-mono whitespace-pre-wrap'
                   >

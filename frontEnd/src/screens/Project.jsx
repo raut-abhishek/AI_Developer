@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import {useRef, useState, useEffect, useContext } from 'react';
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../config/axios.js'
@@ -6,6 +6,7 @@ import { initializeSocket, receiveMessage, sendMessage } from '../config/socket.
 import {UserContext} from '../context/user.context.jsx';
 import Markdown from 'markdown-to-jsx';
 import hljs from 'highlight.js';
+import { getWebContainer } from '../config/webContainer.js';
 
 
 
@@ -26,7 +27,10 @@ const Project = () => {
     const [ messages, setMessages ] = useState([])
     const [fileTree, setFileTree] = useState({})
     const [currentFile, setCurrentFile] = useState(null);
-    const [openFiles, setOpenFiles] = useState([])
+    const [openFiles, setOpenFiles] = useState([]);
+    const [webContainer, setWebContainer] = useState(null);
+    const [ iframeUrl, setIframeUrl ] = useState(null)
+    const [ runProcess, setRunProcess ] = useState(null)
 
 
 
@@ -115,9 +119,19 @@ function flattenTree(tree, prefix = "") {
 }
 
 
+const wcRef = useRef(null);
+
     useEffect(()=>{
 
       const socket = initializeSocket(project._id);
+
+      if (!wcRef.current) {
+        getWebContainer().then(container => {
+          wcRef.current = container;
+          setWebContainer(container);
+          console.log("WebContainer initialized");
+        });
+      }
 
       
       // old handleIncomming function
@@ -158,13 +172,15 @@ function flattenTree(tree, prefix = "") {
         
         console.log("Parsed message:", parsedMessage);
 
-        // if(parsedMessage.fileTree){
-        //   setFileTree(parsedMessage.fileTree);
-        // }
-        if (parsedMessage.fileTree) {
-          const flat = flattenTree(parsedMessage.fileTree);
-          setFileTree(flat);
+        if(parsedMessage.fileTree){
+          setFileTree(parsedMessage.fileTree);
+          console.log("PACKAGE_JSON_CONTENT:", parsedMessage.fileTree["package.json"]?.file?.contents);
         }
+        webContainer?.mount(parsedMessage.fileTree)
+        // if (parsedMessage.fileTree) {
+        //   const flat = flattenTree(parsedMessage.fileTree);
+        //   setFileTree(flat);
+        // }
 
 
         const messageData = { ...data, parsedMessage };
@@ -226,7 +242,7 @@ function flattenTree(tree, prefix = "") {
             ref={messageBox} 
             className="message-box grow p-1 flex flex-col gap-1 overflow-auto max-h-full scrollbar-hide">
               {messages.map((msg, index) => (
-                <div key={index} className={`${msg.sender._id === 'ai' ? 'max-w-80' : 'max-w-54'} ${msg.sender._id == user._id.toString() && 'ml-auto'} maz-w-54 message flex flex-col p-2 bg-slate-50 w-fit rounded-md`}>
+                <div key={msg._id || index} className={`${msg.sender._id === 'ai' ? 'max-w-80' : 'max-w-54'} ${msg.sender._id == user._id.toString() && 'ml-auto'} maz-w-54 message flex flex-col p-2 bg-slate-50 w-fit rounded-md`}>
                   <small className='opacity-65 text-xs'>{msg.sender.email}</small>
                   <div className='text-sm'>
                     {msg.sender._id === 'ai' ?
@@ -312,7 +328,7 @@ function flattenTree(tree, prefix = "") {
 
         </div>
 
-        {currentFile && (
+        {/* {currentFile && ( */}
           <div className="code-editor flex flex-col grow h-full shrink">
 
             <div className="top flex justify-between w-full">
@@ -321,7 +337,7 @@ function flattenTree(tree, prefix = "") {
                 {
                   openFiles.map((file, index) => (
                     <button
-                    key={index}
+                    key={file}
                     onClick={() => setCurrentFile(file)}
                     className={`open-file cursor-pointer p-2 px-4 flex items-center w-fit gap-2  bg-slate-300 ${currentFile === file ? 'bg-slate-400' : ''}`}
                     >
@@ -332,6 +348,67 @@ function flattenTree(tree, prefix = "") {
                   ))
                 }
               </div>
+
+              <div className="action flex gap-2">
+                <button
+                // onClick={async () => {
+                //   await webContainer.mount(fileTree)
+
+                //   const installProcess = await webContainer.spawn("npm", [ "install" ])
+                //   installProcess.output.pipeTo(new WritableStream({
+                //     write(chunk) {
+                //       console.log(chunk)
+                //     }
+                //   }))
+
+                //   if (runProcess) {
+                //     runProcess.kill()
+                //   }
+
+                //   let tempRunProcess = await webContainer.spawn("npm", [ "start" ]);
+
+                //   tempRunProcess.output.pipeTo(new WritableStream({
+                //     write(chunk) {
+                //       console.log(chunk)
+                //     }
+                //   }))
+
+                //   setRunProcess(tempRunProcess)
+
+                //   webContainer.on('server-ready', (port, url) => {
+                //       console.log(port, url)
+                //       setIframeUrl(url)
+                //   })
+
+                // }}
+                onClick={async()=>{
+                  if (!webContainer) return;
+                  await webContainer.mount(fileTree);
+
+                  const installProcess = await webContainer.spawn("npm", [ "install" ]);
+                  installProcess.output.pipeTo(new WritableStream({
+                    write(chunk) {
+                      console.log(chunk)
+                    }
+                  }))
+
+
+
+                  const runProcess = await webContainer.spawn("npm", [ "start" ]);
+                  runProcess.output.pipeTo(new WritableStream({
+                    write(chunk) {
+                      console.log(chunk)
+                    }
+                  }))
+
+                }}
+                className='p-2 px-4 bg-slate-300 text-white'
+                >
+                  run
+                </button>
+
+
+              </div>
               
             </div>
 
@@ -339,7 +416,7 @@ function flattenTree(tree, prefix = "") {
               {
                 fileTree[currentFile] && (
                   <textarea 
-                  value={fileTree[currentFile]?.contents || ""}
+                  value={fileTree[currentFile]?.file.contents || ""}
                   onChange={(e)=>{
                     setFileTree({
                       ...fileTree,
@@ -361,7 +438,7 @@ function flattenTree(tree, prefix = "") {
             </div>
             
           </div>
-        )}
+        {/* )} */}
 
       </section>
 

@@ -92,26 +92,27 @@ const Project = () => {
     //   sendMessage('project-message', { fileTree: ft });
     // }
 
-    function flattenTree(tree, prefix = "") {
-      let result = {};
+function flattenTree(tree, prefix = "") {
+  let result = {};
 
-      for (let key in tree) {
-        const node = tree[key];
+  for (let key in tree) {
+    const node = tree[key];
 
-          if (node.file) {
-            // It's a file
-            const path = prefix ? `${prefix}/${key}` : key;
-            result[path] = node.file;  // file contains { contents }
-          }
-
-          if (node.dir) {
-            const newPrefix = prefix ? `${prefix}/${key}` : key;
-            Object.assign(result, flattenTree(node.dir, newPrefix));
-          }
-      }
-
-      return result;
+    // ▣ Handle file
+    if (node.file) {
+      const path = prefix ? `${prefix}/${key}` : key;
+      result[path] = node.file; // { contents }
     }
+  
+    // ▣ Handle folder (AI uses children)
+    if (node.children) {
+      const newPrefix = prefix ? `${prefix}/${key}` : key;
+      Object.assign(result, flattenTree(node.children, newPrefix));
+    }
+  }
+
+  return result;
+}
 
 
     useEffect(()=>{
@@ -338,7 +339,7 @@ const Project = () => {
               {
                 fileTree[currentFile] && (
                   <textarea 
-                  value={fileTree[currentFile].file?.contents || ""}
+                  value={fileTree[currentFile]?.contents || ""}
                   onChange={(e)=>{
                     setFileTree({
                       ...fileTree,

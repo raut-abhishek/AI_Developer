@@ -170,11 +170,11 @@ const wcRef = useRef(null);
           }
         }
         
-        console.log("Parsed message:", parsedMessage);
+        // console.log("Parsed message:", parsedMessage);
 
         if(parsedMessage.fileTree){
           setFileTree(parsedMessage.fileTree);
-          console.log("PACKAGE_JSON_CONTENT:", parsedMessage.fileTree["package.json"]?.file?.contents);
+          // console.log("PACKAGE_JSON_CONTENT:", parsedMessage.fileTree["package.json"]?.file?.contents);
         }
         webContainer?.mount(parsedMessage.fileTree)
         // if (parsedMessage.fileTree) {
@@ -381,27 +381,37 @@ const wcRef = useRef(null);
                 //   })
 
                 // }}
-                onClick={async()=>{
+                onClick={async () => {
                   if (!webContainer) return;
+
+                  // 1. Mount files
                   await webContainer.mount(fileTree);
 
-                  const installProcess = await webContainer.spawn("npm", [ "install" ]);
+                  // 2. Run npm install
+                  const installProcess = await webContainer.spawn("npm", ["install"]);
+
+                  // Log output
                   installProcess.output.pipeTo(new WritableStream({
                     write(chunk) {
-                      console.log(chunk)
+                      console.log(chunk);
                     }
-                  }))
+                  }));
 
+                  // 3. WAIT for install to finish
+                  await installProcess.exit;
 
+                  // 4. Start app AFTER install is done
+                  const runProcess = await webContainer.spawn("npm", ["start"]);
 
-                  const runProcess = await webContainer.spawn("npm", [ "start" ]);
                   runProcess.output.pipeTo(new WritableStream({
                     write(chunk) {
-                      console.log(chunk)
+                      console.log(chunk);
                     }
-                  }))
+                  }));
 
+                  setRunProcess(runProcess);
                 }}
+
                 className='p-2 px-4 bg-slate-300 text-white'
                 >
                   run

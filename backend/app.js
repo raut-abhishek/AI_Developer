@@ -14,6 +14,7 @@ connect();
 
 // initialize express
 const app = express();
+const __dirname = path.resolve();
 
 
 app.use(cors());
@@ -29,9 +30,10 @@ app.use('/projects', projectRoutes);
 app.use('/ai', aiRoutes);
 
 
+app.use(express.static(path.join(__dirname, "dist")));
 
-app.get('/', (req, res)=>{
-    res.json('Hello World');
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 export default app;

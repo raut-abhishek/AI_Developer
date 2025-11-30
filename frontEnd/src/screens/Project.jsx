@@ -492,17 +492,8 @@ const wcRef = useRef(null);
   )
 }
 
+
 export default Project;
 
 
 
-// {
-//             currentFile && (
-//               <div className="code-editor-header flex justify-between items-center p-2 bg-slate-200">
-//                 <h1 className='font-semibold text-lg'>{currentFile}</h1>
-//                 <button className='p-2' onClick={()=>setCurrentFile(null)}>
-//                   <i className='ri-close-fill'></i>
-//                 </button>
-//               </div>
-//             )
-//           }

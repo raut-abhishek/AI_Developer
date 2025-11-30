@@ -7,14 +7,16 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import projectRoutes from './routes/project.routes.js'
 import aiRoutes from './routes/ai.routes.js';
-
+import path from "path";
+import { fileURLToPath } from "url";
 
 connect();
 
 
 // initialize express
 const app = express();
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 app.use(cors());
@@ -32,8 +34,7 @@ app.use('/ai', aiRoutes);
 
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("*", (req, res) => {
+app.get(new RegExp(".*"), (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
-
 export default app;

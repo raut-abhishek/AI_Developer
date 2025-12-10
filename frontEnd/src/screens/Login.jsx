@@ -102,7 +102,7 @@ AI: "Awaiting your credentials..."`}
             {/* Button */}
             <button
               type="submit"
-              className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 
+              className="w-full py-3 bg-linear-to-r from-cyan-500 to-blue-600 
               text-white rounded-lg font-medium hover:opacity-90 transition 
               active:scale-95 shadow-lg shadow-cyan-500/30"
             >

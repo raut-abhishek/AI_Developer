@@ -1,13 +1,13 @@
 import React from 'react'
-import { useState , useContext} from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from '../config/axios.js';
-import {UserContext} from '../context/user.context.jsx'
+import { UserContext } from '../context/user.context.jsx';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
-  const {setUser} = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,83 +17,109 @@ export default function Login() {
     e.preventDefault();
 
     axios.post('/user/login', {
-      email: formData.email ,
+      email: formData.email,
       password: formData.password,
-    }).then((res)=> {
-      console.log(res.data);
-
-      localStorage.setItem('token', res.data.token)
-
-      setUser(res.data.user)
-
-      navigate("/");
-    }).catch((err)=> {
-      console.log(err.response?.data);
     })
-    
+      .then((res) => {
+        localStorage.setItem('token', res.data.token);
+        setUser(res.data.user);
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err.response?.data);
+      });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-950 via-gray-900 to-black text-gray-100">
-      <div className="w-full max-w-md bg-gray-900/70 backdrop-blur-lg border border-gray-800 p-8 rounded-2xl shadow-2xl">
-        <h1 className="text-3xl font-bold text-center mb-6">
-          AI Developer Login
-        </h1>
+    <div className="min-h-screen w-full flex bg-black overflow-hidden">
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
+      {/* LEFT SIDE - AI CONSOLE */}
+      <div className="relative hidden lg:flex w-1/2 bg-[#060c1f] 
+        items-center justify-center overflow-hidden">
 
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
+        {/* Soft Diagonal Shape */}
+        <div className="absolute top-0 right-0 w-full h-full bg-gray-950 
+        clip-path-[polygon(0_0,100%_0,70%_100%,0_100%)]">
+        </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className="w-full py-3 mt-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-medium text-white transition duration-200"
-          >
-            Login
-          </button>
-        </form>
+        {/* Terminal Glow */}
+        <div className="absolute inset-0 bg-gray-950 blur-[90px]"></div>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
-          Don’t have an account?{" "}
-          <Link
-            to="/register"
-            className="text-indigo-400 hover:text-indigo-300 transition"
-          >
-            Create one
-          </Link>
-        </p>
+        {/* Terminal Text */}
+        <pre className="relative z-10 text-cyan-300 font-mono text-sm md:text-base whitespace-pre-wrap px-10 opacity-80 leading-6">
+          {`Initializing AI Developer System...
+> Loading modules: core, compiler, intelligence, UI-engine
+> Status: Optimal ✓
+
+AI: "Hello Developer, authentication required."
+AI: "Preparing secure environment..."
+AI: "Awaiting your credentials..."`}
+        </pre>
       </div>
+
+      {/* RIGHT SIDE - LOGIN CARD */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
+
+        <div className="w-full max-w-md
+          p-8 rounded-2xl shadow-xl">
+
+          <h1 className="text-3xl font-bold text-white mb-6">
+            Login to AI Developer
+          </h1>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+
+            {/* Email */}
+            <div>
+              <label className="text-sm text-white/60">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                className="w-full px-4 py-3 mt-2 rounded-lg bg-white/10 border border-white/20 
+                text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
+                required
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="text-sm text-white/60">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 mt-2 rounded-lg bg-white/10 border border-white/20 
+                text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
+                required
+              />
+            </div>
+
+            {/* Button */}
+            <button
+              type="submit"
+              className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 
+              text-white rounded-lg font-medium hover:opacity-90 transition 
+              active:scale-95 shadow-lg shadow-cyan-500/30"
+            >
+              Login
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-white/60 mt-6">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-cyan-300 hover:text-cyan-200">
+              Create one
+            </Link>
+          </p>
+
+        </div>
+      </div>
+
     </div>
   );
 }

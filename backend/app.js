@@ -19,7 +19,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://ai-developer-i45a.onrender.com"
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
 
 app.use(morgan('dev'));
 app.use(express.json());

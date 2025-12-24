@@ -12,9 +12,15 @@ const port = process.env.PORT;
 
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://your-production-app.com'
+];
+
 const io = new Server(server, {
     cors:{
-        origin:'*'
+        origin:allowedOrigins,
+        // methods:['GET', 'POST']
     }
 });
 

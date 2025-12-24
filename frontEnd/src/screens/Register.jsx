@@ -35,8 +35,17 @@ export default function Register() {
       <div className="absolute w-72 h-72 bg-indigo-600/20 blur-3xl rounded-full -top-10 -left-10"></div>
       <div className="absolute w-72 h-72 bg-purple-600/20 blur-3xl rounded-full bottom-0 right-0"></div>
 
+      {/* Project Title */}
+      <div className="absolute top-10 w-full text-center z-10">
+        <h1 className="text-6xl font-extrabold tracking-wide">
+          <span className="text-indigo-500">AI</span>
+          <span className="text-white"> Developer</span>
+        </h1>
+        <p className="text-xl text-gray-400 mt-2">Build • Collaborate • Innovate</p>
+      </div>
+
       {/* Card */}
-      <div className="relative w-full max-w-md p-8 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.6)]">
+      <div className="relative w-full max-w-md p-8 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.6)] top-5">
 
         {/* Heading */}
         <h1 className="text-3xl font-bold text-center mb-1">

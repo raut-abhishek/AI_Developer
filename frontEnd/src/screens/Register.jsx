@@ -5,6 +5,7 @@ import axios from '../config/axios.js';
 import { UserContext } from '../context/user.context.jsx';
 
 export default function Register() {
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
@@ -13,18 +14,22 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axios.post('/user/register', {
-      email: formData.email,
-      password: formData.password,
-    }).then((res) => {
+    setError("");
+    try {
+      const res = await axios.post("/user/register", formData);
       localStorage.setItem('token', res.data.token);
       setUser(res.data.user);
       navigate("/");
-    }).catch((err) => {
-      console.log(err);
-    })
+      
+    } 
+    catch (err) {
+      const message = err.response?.data?.message || err.response?.data || "Registration failed";
+
+      setError(message);
+    }
+    
   };
 
   return (
@@ -70,12 +75,12 @@ export default function Register() {
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg 
-              bg-black/50 border border-gray-700 
-              text-gray-100 placeholder-gray-500
-              focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className={`w-full px-4 py-3 rounded-lg bg-black/50 border text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${error ?"border-red-500":"border-gray-700"}`}
               required
             />
+            {error && (
+              <p className='text-red-400 text-sm mt-1'>{error}</p>
+            )}
           </div>
 
           {/* Password */}

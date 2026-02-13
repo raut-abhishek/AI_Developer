@@ -20,7 +20,11 @@ export const createUserController = async (req, res)=>{
 
         res.status(201).json({user, token});
     } catch (error) {
-        res.status(400).send(error.message);
+        if (error.code === 11000) {
+            return res.status(400).json({ message: "Email already registered" });
+        }
+
+        res.status(400).json({ message: error.message || "User creation failed" });
     }
 }
 

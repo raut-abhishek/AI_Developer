@@ -5,6 +5,7 @@ import axios from '../config/axios.js';
 import { UserContext } from '../context/user.context.jsx';
 
 export default function Login() {
+  const[error, setError] = useState("");
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
@@ -27,6 +28,8 @@ export default function Login() {
       })
       .catch((err) => {
         console.log(err.response?.data);
+        setError(err.response.data.errors);
+        console.log(error);
       });
   };
 
@@ -78,8 +81,7 @@ AI: "Awaiting your credentials..."`}
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 mt-2 rounded-lg bg-white/10 border border-white/20 
-                text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
+                className={`w-full px-4 py-3 mt-2 rounded-lg bg-white/10 border ${error ? "border-red-500" : "border-white/20"} text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-400 focus:outline-none`}
                 required
               />
             </div>
@@ -93,10 +95,12 @@ AI: "Awaiting your credentials..."`}
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 mt-2 rounded-lg bg-white/10 border border-white/20 
-                text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-400 focus:outline-none"
+                className={`w-full px-4 py-3 mt-2 rounded-lg bg-white/10 border ${error ? "border-red-500" : "border-white/20"} text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-400 focus:outline-none`}
                 required
               />
+              {error && (
+                <p className="text-red-400 text-sm mt-1">{error}</p>
+              )}
             </div>
 
             {/* Button */}
